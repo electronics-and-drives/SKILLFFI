@@ -24,7 +24,7 @@
                     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n
                     SOFTWARE.\n"
              'url "LICENSE URL")
-    ?entry "ffi.il"
+    ?entry "ffi.ils"
     ?environment (list "FFIPATH")
     ?repository "github"
 )

@@ -1,5 +1,3 @@
-(define ffiCID (ipcSkillProcess (strcat (getShellEnvVar "FFIPATH") "/skillFFI")))
-
 (defun ffiOpenLib (t_lib)
 	(cond
         ((stringp t_lib)
@@ -8,7 +6,7 @@
                 (let ()
                     (ipcWriteProcess ffiCID (strcat t_lib "\n"))
                     (ipcReadProcess ffiCID ffiTimeOut))
-                (error "FFI ERROR" "TRY RELOADING"))
+                (error "FFI ERROR" "TRY RELOADING")))
         (t (error "FFI - Expected arguemnt type string, got %s." (typep t_lib))))
 )
 
@@ -89,10 +87,16 @@
     (t (error "FFI - Resource Busy..."))
 )
 
-(let ((ffiTimeOut 4)
-      (ffiReady "ffi ready"))
+(define SFFI (list nil
+    'cid (ipcSkillProcess (strcat (getShellEnvVar "FFIPATH") "/skillFFI"))
+    'path (strcat (getShellEnvVar "FFIPATH") "/skillFFI")
+    'timeout 4
+    'ready "ffi ready"
+))
 
-    (if (eq ffiReady (ipcReadProcess ffiCID ffiTimeOut))
-        (printf "%s" "FFI up and running\n")
-        (error "FFI ERROR" "Could not launch FFI\n"))
+
+(let ((ffiReady (ipcReadProcess ffiCID ffiTimeOut)))
+    (if (eq ffiReady (get SFFI 'ready))
+        (printf "FFI - Up and running!\n")
+        (error "FFI - Could not launch FFI!"))
 )

@@ -1,16 +1,4 @@
-(setq ffiTimeOut 4)
-
-(if (boundp 'ffiCID)
-    (ipcKillProcess ffiCID)
-)
-
-(setq ffiCID (ipcSkillProcess "~/workspace/ffiSKILL/skillFFI"))
-(setq ffiReady (ipcReadProcess ffiCID ffiTimeOut))
-
-(if (eq ffiReady "ffi ready")
-    (printf "%s" "FFI up and running\n")
-	(error "FFI ERROR" "Could not launch FFI\n")
-)
+(define ffiCID (ipcSkillProcess (strcat (getShellEnvVar "FFIPATH") "/skillFFI")))
 
 (defun ffiOpenLib (libName)
 	(if (stringp libName) then
@@ -97,4 +85,12 @@
     else
         (error "Resource Busy...")
     )
+)
+
+(let ((ffiTimeOut 4)
+      (ffiReady "ffi ready"))
+
+    (if (eq ffiReady (ipcReadProcess ffiCID ffiTimeOut))
+        (printf "%s" "FFI up and running\n")
+        (error "FFI ERROR" "Could not launch FFI\n"))
 )

@@ -1,24 +1,27 @@
 (define ffiCID (ipcSkillProcess (strcat (getShellEnvVar "FFIPATH") "/skillFFI")))
 
-(defun ffiOpenLib (libName)
-	(if (stringp libName) then
-		(ipcWriteProcess ffiCID "open\n")
-		(if (eq (ipcReadProcess ffiCID ffiTimeOut) "open") then
-		    (ipcWriteProcess ffiCID (strcat libName "\n"))
-            (ipcReadProcess ffiCID ffiTimeOut)
-        else
-            (error "FFI ERROR" "TRY RELOADING")
-        )
-	else
-        (error "Expected arguemnt string, gotten %s." (typep libName))
-    )
+(defun ffiOpenLib (t_lib)
+	(cond
+        ((stringp t_lib)
+		    (ipcWriteProcess ffiCID "open\n")
+		    (if (eq (ipcReadProcess ffiCID ffiTimeOut) "open")
+                (let ()
+                    (ipcWriteProcess ffiCID (strcat t_lib "\n"))
+                    (ipcReadProcess ffiCID ffiTimeOut))
+                (error "FFI ERROR" "TRY RELOADING"))
+        (t (error "FFI - Expected arguemnt type string, got %s." (typep t_lib))))
 )
 
-(defun ffiDefun (libHandle fnName rType aTypes)
-    (cond ((not (stringp libHandle)) (error "libHandle has to be a string instead of %s" (typep libHandle)))
-        ((not (stringp fnName)) (error "fnName has to be a string instead of %s" (typep fnName)))
-        ((not (stringp rType)) (error "rType has to be a string instead of %s" (typep rType)))
-        ((not (listp aTypes)) (error "aTypes has to be a string instead of %s" (typep aTypes)))
+(defun ffiDefun (t_libHandle t_fnName t_rType t_aTypes)
+    (cond 
+        ((not (stringp t_libHandle)) 
+            (error "FFI - t_libHandle has to be a string instead of %s" (typep t_libHandle)))
+        ((not (stringp t_fnName)) 
+            (error "FFI - t_fnName has to be a string instead of %s" (typep t_fnName)))
+        ((not (stringp t_rType)) 
+            (error "FFI - t_rType has to be a string instead of %s" (typep t_rType)))
+        ((not (listp t_aTypes)) 
+            (error "FFI - t_aTypes has to be a string instead of %s" (typep t_aTypes)))
         (t 
 		    (ipcWriteProcess ffiCID "prep\n")
             (if (eq (ipcReadProcess ffiCID ffiTimeOut) "func") then
@@ -79,12 +82,11 @@
 )
 
 (defun ffiCloseLib (libHandle)
-    (if (eq (ipcWaitForProcess ffiCID) t) then
-        (ipcWriteProcess ffiCID "")
-        (ipcReadProcess ffiCID)
-    else
-        (error "Resource Busy...")
-    )
+    (cond
+        ((eq (ipcWaitForProcess ffiCID) t)
+            (ipcWriteProcess ffiCID "")
+            (ipcReadProcess ffiCID))
+    (t (error "FFI - Resource Busy..."))
 )
 
 (let ((ffiTimeOut 4)

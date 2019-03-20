@@ -1,7 +1,7 @@
 (let ()
     (lambda (t_path)
         (if (shell (strcat "cd " t_path "; make ffi"))
-            (if (isFile "skillFFI")
+            (if (isFile (strcat t_path "/skillFFI"))
                 (if (shell "chmod +x skillFFI")
                     (printf "SKILLFFI - Successfuly built and installed.\n")
                     (error "SKILLFFI - Failed to make skillFFI executable."))

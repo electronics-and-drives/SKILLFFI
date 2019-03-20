@@ -84,7 +84,7 @@
         ((eq (ipcWaitForProcess ffiCID) t)
             (ipcWriteProcess ffiCID "")
             (ipcReadProcess ffiCID))
-    (t (error "FFI - Resource Busy..."))
+    (t (error "FFI - Resource Busy...")))
 )
 
 (define SFFI (list nil

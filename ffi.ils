@@ -64,10 +64,9 @@
             
 (defun ffiCloseLib (t_libHandle)
     (cond
-        ((eq (ipcWaitForProcess (get SFFI 'cid)) t)
-            (ipcWriteProcess (get SFFI 'cid) "")
-            (ipcReadProcess (get SFFI 'cid)))
-    (t (error "FFI - Resource Busy...")))
+        ((ipcWaitForProcess (get SFFI 'cid))
+            (ipcKillProcess (get SFFI 'cid)))
+        (t (warn "FFI - Resource Busy...")))
 )
 
 (define SFFI (list nil

@@ -19,7 +19,7 @@
         ((not (stringp t_rType)) 
             (error "FFI - t_rType has to be a string instead of %s" (typep t_rType)))
         ((not (listp l_aTypes)) 
-            (error "FFI - t_aTypes has to be a string instead of %s" (typep t_aTypes)))
+            (error "FFI - t_aTypes has to be a string instead of %s" (typep l_aTypes)))
         (t 
             (let ((o_pid (get SFFI 'cid)) (n_timeout (get SFFI 'timeout)))
                 (if (eq (hsrtWriteCid o_pid "prep\n") "func") 
@@ -28,7 +28,7 @@
                             (if (eq (hsrtWriteCid o_pid (strcat t_rType "\n")) "numargs") 
                                 (if (eq (hsrtWriteCid 
                                             o_pid 
-                                            (sprintf nil "%d\n" (length t_aTypes))) 
+                                            (sprintf nil "%d\n" (length l_aTypes))) 
                                             "atype") 
                                     (reduce 
                                         (lambda (at res)

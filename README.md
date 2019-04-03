@@ -35,15 +35,15 @@ This should result in an executable named ```skillFFI```.
 
 ### Example Usage
 
-Start by loading _ffi.il_ in the CIW:
+Start by loading ```ffi.ils```:
 
 ```scheme
-(load "ffi.il")
+(load "ffi.ils")
 ```
 
 This should print a confirmation
 
-```scheme
+```
 FFI up and running
 ```
 
@@ -53,7 +53,7 @@ or it has to be located in the LD\_LIBRARY\_PATH environment variable.
 Loading the C math library is accomplished like so:
 
 ```scheme
-(setq libm (ffiOpenLib "libm.so")
+(define libm (ffiOpenLib "libm.so")
 ```
 
 ```ffiOpenLib``` loads the library and returns a memory address as handle, which
@@ -62,54 +62,56 @@ Since there is no access to header files in SKILL the function prototype must be
 defined manually.
 
 ```scheme
-(setq sqrtf (ffiDefun libm "sqrtf" "float" (list "float")))
+(define sqrtf (ffiDefun libm "sqrtf" "float" (list "float")))
 ```
 
 If successful ```ffiDefun``` returns a handle to the prototyped function, which
 can be called with ```ffiCallFun```.
 
 ```scheme
-(setq res (ffiCallfun fnSqrt (list 144.0)))
+(define res (ffiCallfun sqrtf (list 144.0)))
 ```
+
+This stores the return value of a call to ```sqrtf``` in ```res```.
 
 ## Function Reference
 
 **ffiOpenLib**
 
-```(ffiOpenLib libName) => libHandle```
+```(ffiOpenLib t_libName) => t_libHandle```
 
-Opens a shared library and returns a handle to it. _libName_ can either be the
+Opens a shared library and returns a handle to it. _t\_libName_ can either be the
 entire absolute path to a library or just its name if the path is in the
 LD\_LIBRARY\_PATH environment variable.
 
-+ _libName_ is a string with the entire absolute path to the library.
++ _t\_libName_ is a string with the entire absolute path to the library.
 
 **ffiDefun**
 
-```(ffiDefun libHandle fnName rType aTypes) => fnHandle```
+```(ffiDefun t_libHandle t_fnName t_rType l_aTypes) => t_fnHandle```
 
 Defines the prototype for a C function and returns a handle to it if succesful.
-The _libHandle_ is a handle returned by ```ffiOpenLib```. The name of the function
-has to be known in advance and passed as _fnName_. The return type of the function
-is the string _rType_. _aTypes_ is a string list with the types of arguments.
+The _t\_libHandle_ is a handle returned by ```ffiOpenLib```. The name of the function
+has to be known in advance and passed as _t\_fnName_. The return type of the function
+is the string _t\_rType_. _t\_aTypes_ is a string list with the types of arguments.
 
-+ _libHandle_ is a string containing a handle to an open shared library.
-+ The name of the function is a string in _fnName_.
-+ _rType_ is the return type of the function as a string.
-+ _aTypes_ is a string list containing the types of the function arguments.
++ _t\_libHandle_ is a string containing a handle to an open shared library.
++ The name of the function is a string in _t\_fnName_.
++ _t\_rType_ is the return type of the function as a string.
++ _l\_aTypes_ is a string list containing the types of the function arguments.
 
 **ffiCallfun**
 
-```(ffiCallfun fnHandle fnArgs) => result```
+```(ffiCallfun t_fnHandle l_fnArgs) => x_result```
 
 Calls a previously defined function with the given arguemnts in _fnArgs_ and
 returns whatever this function call retured.
 
-+ _fnHandle_ is a string containing a function handle obtained by ```ffiDefun```.
-+ _fnArgs_ is a list of arguments corresponding to the correct types given in the definition.
++ _t\_fnHandle_ is a string containing a function handle obtained by ```ffiDefun```.
++ _l\_fnArgs_ is a list of arguments corresponding to the correct types given in the definition.
 
 **ffiCloseLib**
 
-```ffiCloseLib libHandle)```
+```ffiCloseLib t_libHandle)```
 
 Closes the library.

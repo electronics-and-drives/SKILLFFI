@@ -29,7 +29,7 @@
                                 (if (eq (hsrtWriteCid 
                                             o_pid 
                                             (sprintf nil "%n\n" (length l_aTypes)) 
-                                            "atype") 
+                                            "atype"))
                                     (reduce 
                                         (lambda (at res)
                                             (if (eq res "atype")

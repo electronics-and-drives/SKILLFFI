@@ -28,7 +28,7 @@
                             (if (eq (hsrtWriteCid o_pid (strcat t_rType "\n")) "numargs") 
                                 (if (eq (hsrtWriteCid 
                                             o_pid 
-                                            (strcat (sprintf nil "%d" (length l_aTypes)) "\n")) 
+                                            (sprintf nil "%n\n" (length l_aTypes)) 
                                             "atype") 
                                     (reduce 
                                         (lambda (at res)

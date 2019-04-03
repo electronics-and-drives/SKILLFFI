@@ -46,14 +46,11 @@
         (t (let ((o_pid (get SFFI 'cid)) (n_timeout (get SFFI 'timeout)))
                 (if (eq (hsrtWriteCid o_pid "call\n") "fun")
                     (if (eq (hsrtWriteCid o_pid (strcat t_fnHandle "\n")) "val")
-                        (reduce 
-                            (lambda (val res)
-                                (if (eq res "val")
-                                    (hsrtWriteCid o_pid (strcat val "\n"))
-                                    (ipcReadProcess o_pid n_timeout)))
-                            "val"
-                            l_fnArgs)
-                        (error "FFI - arguments %l" l_fnArgs))
+                        (lastElem (transform 
+                            (lambda (val)
+                                (hsrtWriteCid o_pid (strcat val "\n")))
+                            l_fnArgs))
+                        (error "FFI - arguments %N" l_fnArgs))
                     (error "FFI - calling function %s" t_fnHandle)))))
 )
             

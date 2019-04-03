@@ -1,4 +1,4 @@
-(spmDefinePkg "SKILLFFI" "rbzentrum" "spam"                                                                    
+(spmDefinePkg "SKILLFFI" "rbzentrum" "spam" "0.0.1"
     ?authors (list "Yannick Uhlmann")
     ?description "With the Foreign Function Interface (FFI) for SKILL C-Type Libraries can be loaded and used within the SKILL environment."
     ?url "https://rbzentrum.de/"

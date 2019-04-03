@@ -10,7 +10,7 @@
         (t (error "FFI - Expected arguemnt type string, got %s." (typep t_lib))))
 )
 
-(defun ffiDefun (t_libHandle t_fnName t_rType t_aTypes)
+(defun ffiDefun (t_libHandle t_fnName t_rType l_aTypes)
     (cond 
         ((not (stringp t_libHandle)) 
             (error "FFI - t_libHandle has to be a string instead of %s" (typep t_libHandle)))
@@ -18,57 +18,73 @@
             (error "FFI - t_fnName has to be a string instead of %s" (typep t_fnName)))
         ((not (stringp t_rType)) 
             (error "FFI - t_rType has to be a string instead of %s" (typep t_rType)))
-        ((not (listp t_aTypes)) 
+        ((not (listp l_aTypes)) 
             (error "FFI - t_aTypes has to be a string instead of %s" (typep t_aTypes)))
         (t 
-		    (ipcWriteProcess (get SFFI 'cid) "prep\n")
-            (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "func") then
-                (ipcWriteProcess (get SFFI 'cid) (strcat fnName "\n"))
-                (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "lib") then
-                    (ipcWriteProcess (get SFFI 'cid) (strcat libHandle "\n"))
-                    (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "rtype") then
-                        (ipcWriteProcess (get SFFI 'cid) (strcat rType "\n"))
-                        (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "numargs") then
-                            (sprintf numargs "%d" (length aTypes))
-                            (ipcWriteProcess (get SFFI 'cid) (strcat  numargs "\n"))
-                            (while (neq aTypes nil)
-                                (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "atype") then
-                                    (ipcWriteProcess (get SFFI 'cid) (strcat (car aTypes) "\n"))
-                                    (setq aTypes (cdr aTypes))
-                                )
-                            )
-                            (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))
-                        else
-                            (error "FFI ERROR" "numargs")
-                        )
-                    else
-                        (error "FFI ERROR" "rtype")
-                    )
-                else
-                    (error "FFI ERROR" "lib handle")
+            (let ((o_pid (get SFFI 'cid)) (n_timeout (get SFFI 'timeout)))
+                (if (eq (hsrtWriteCid o_pid "prep\n") "func") 
+                    (if (eq (hsrtWriteCid o_pid (strcat t_fnName "\n")) "lib") 
+                        (if (eq (hsrtWriteCid o_pid (strcat t_libHandle "\n")) "rtype") 
+                            (if (eq (hsrtWriteCid o_pid (strcat t_rType "\n")) "numargs") 
+                                (if (eq (hsrtWriteCid o_pid (strcat t_rType "\n")) "numargs") 
+                                    (if (eq (hsrtWriteCid o_pid 
+                                            (strcat (sprintf "%d" (length t_aTypes)) "\n")) 
+                                            "atype") 
+                                        (filter 
+                                            (lambda (ret at)
+                                                (if)
+                                            )
+                                            l_aTypes)
+
                 )
-            else
-                (error "FFI ERROR" "function name")
             )
-        )
-    )
+        ))
+		    ;(ipcWriteProcess (get SFFI 'cid) "prep\n")
+            ;(if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "func") then
+            ;    (ipcWriteProcess (get SFFI 'cid) (strcat t_fnName "\n"))
+            ;    (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "lib") then
+            ;        (ipcWriteProcess (get SFFI 'cid) (strcat t_libHandle "\n"))
+            ;        (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "rtype") then
+            ;            (ipcWriteProcess (get SFFI 'cid) (strcat t_rType "\n"))
+            ;            (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "numargs") then
+            ;                (sprintf t_numargs "%d" (length t_aTypes))
+            ;                (ipcWriteProcess (get SFFI 'cid) (strcat t_numargs "\n"))
+            ;                (while (neq aTypes nil)
+            ;                    (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "atype") then
+            ;                        (ipcWriteProcess (get SFFI 'cid) (strcat (car l_aTypes) "\n"))
+            ;                        (setq l_aTypes (cdr l_aTypes))
+            ;                    )
+            ;                )
+            ;                (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))
+            ;            else
+            ;                (error "FFI ERROR" "numargs")
+            ;            )
+            ;        else
+            ;            (error "FFI ERROR" "rtype")
+            ;        )
+            ;    else
+            ;        (error "FFI ERROR" "lib handle")
+            ;    )
+            ;else
+            ;    (error "FFI ERROR" "function name")
+            ;)
 )
 
-(defun ffiCallfun (fnHandle fnArgs)
-    (cond ((not (stringp fnHandle)) (error "fnHandle has to be a string instead of %s" (typep fnHandle)))
-        ((not (listp fnArgs)) (error "fnArgs has to be a string instead of %s" (typep fnArgs)))
+(defun ffiCallfun (t_fnHandle l_fnArgs)
+    (cond ((not (stringp t_fnHandle)) (error "t_fnHandle has to be a string instead of %s" (typep t_fnHandle)))
+        ((not (listp l_fnArgs)) (error "l_fnArgs has to be a string instead of %s" (typep l_fnArgs)))
         (t
             (ipcWriteProcess (get SFFI 'cid) "call\n")
             (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "fun") then
-                (ipcWriteProcess (get SFFI 'cid) (strcat fnHandle "\n"))
-                (while (neq fnArgs nil)
+                (ipcWriteProcess (get SFFI 'cid) (strcat t_fnHandle "\n"))
+                (while (neq l_fnArgs nil)
                     (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "val") then
-                        (setq fnarg (car fnArgs))
+                        (setq fnarg (car l_fnArgs))
                         (if (not (stringp fnarg))
                             (sprintf fnarg "%n" fnarg)
                         )
                         (ipcWriteProcess (get SFFI 'cid) (strcat fnarg "\n"))
-                        (setq fnArgs (cdr fnArgs))
+                        (setq l_fnArgs (cdr l_fnArgs))
                     )
                 )
                 (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))
@@ -79,7 +95,7 @@
     )
 )
 
-(defun ffiCloseLib (libHandle)
+(defun ffiCloseLib (t_libHandle)
     (cond
         ((eq (ipcWaitForProcess (get SFFI 'cid)) t)
             (ipcWriteProcess (get SFFI 'cid) "")

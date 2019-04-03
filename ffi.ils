@@ -1,12 +1,10 @@
 (defun ffiOpenLib (t_lib)
 	(cond
         ((stringp t_lib)
-		    (ipcWriteProcess (get SFFI 'cid) "open\n")
-		    (cond 
-                ((eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "open")
-                    (ipcWriteProcess (get SFFI 'cid) (strcat t_lib "\n"))
-                    (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)))
-                (t (error "FFI ERROR" "TRY RELOADING"))))
+            (let ((o_pid (get SFFI 'cid)))
+                (if (eq (hsrtWriteCid (get SFFI 'cid) "open\n") "open")
+                    (hsrtWriteCid (get SFFI 'cid) (strcat t_lib "\n"))
+                    (error "FFI - try reloading"))))
         (t (error "FFI - Expected arguemnt type string, got %s." (typep t_lib))))
 )
 
@@ -28,13 +26,10 @@
                             (if (eq (hsrtWriteCid o_pid (strcat t_rType "\n")) "numargs") 
                                 (if (eq (hsrtWriteCid o_pid (sprintf nil "%n\n" (length l_aTypes)))
                                         "atype")
-                                    (reduce 
-                                        (lambda (at res)
-                                            (if (eq res "atype")
-                                                (hsrtWriteCid o_pid (strcat at "\n"))
-                                                (ipcReadProcess o_pid n_timeout)))
-                                        "aType"
-                                        l_aTypes)
+                                    (lastElem (transform 
+                                        (lambda (at)
+                                            (hsrtWriteCid o_pid (strcat at "\n")))
+                                        l_aTypes))
                                     (error "FFI - atypes"))
                                 (error "FFI - numargs"))
                             (error "FFI - rtype"))

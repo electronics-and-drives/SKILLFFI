@@ -43,35 +43,6 @@
                         (error "FFI - lib handle"))
                     (error "FFI - function name")))))
 )
-		    ;(ipcWriteProcess (get SFFI 'cid) "prep\n")
-            ;(if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "func") then
-            ;    (ipcWriteProcess (get SFFI 'cid) (strcat t_fnName "\n"))
-            ;    (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "lib") then
-            ;        (ipcWriteProcess (get SFFI 'cid) (strcat t_libHandle "\n"))
-            ;        (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "rtype") then
-            ;            (ipcWriteProcess (get SFFI 'cid) (strcat t_rType "\n"))
-            ;            (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "numargs") then
-            ;                (sprintf t_numargs "%d" (length t_aTypes))
-            ;                (ipcWriteProcess (get SFFI 'cid) (strcat t_numargs "\n"))
-            ;                (while (neq aTypes nil)
-            ;                    (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "atype") then
-            ;                        (ipcWriteProcess (get SFFI 'cid) (strcat (car l_aTypes) "\n"))
-            ;                        (setq l_aTypes (cdr l_aTypes))
-            ;                    )
-            ;                )
-            ;                (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))
-            ;            else
-            ;                (error "FFI ERROR" "numargs")
-            ;            )
-            ;        else
-            ;            (error "FFI ERROR" "rtype")
-            ;        )
-            ;    else
-            ;        (error "FFI ERROR" "lib handle")
-            ;    )
-            ;else
-            ;    (error "FFI ERROR" "function name")
-            ;)
 
 (defun ffiCallfun (t_fnHandle l_fnArgs)
     (cond 
@@ -93,27 +64,6 @@
                     (error "FFI - calling function %s" t_fnHandle)))))
 )
             
-;            (ipcWriteProcess (get SFFI 'cid) "call\n")
-;            (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "fun") then
-;                (ipcWriteProcess (get SFFI 'cid) (strcat t_fnHandle "\n"))
-;                (while (neq l_fnArgs nil)
-;                    (if (eq (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout)) "val") then
-;                        (setq fnarg (car l_fnArgs))
-;                        (if (not (stringp fnarg))
-;                            (sprintf fnarg "%n" fnarg)
-;                        )
-;                        (ipcWriteProcess (get SFFI 'cid) (strcat fnarg "\n"))
-;                        (setq l_fnArgs (cdr l_fnArgs))
-;                    )
-;                )
-;                (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))
-;            else
-;                (error "FFI ERROR" "calling the function")
-;            )
-;        )
-;    )
-;)
-
 (defun ffiCloseLib (t_libHandle)
     (cond
         ((eq (ipcWaitForProcess (get SFFI 'cid)) t)

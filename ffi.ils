@@ -2,13 +2,13 @@
 	(cond
         ((stringp t_lib)
             (let ((o_pid (get SFFI 'cid)))
-                (if (eq (hsrtWriteCid (get SFFI 'cid) "open\n") "open")
+                (if (eq (strcmp (hsrtWriteCid (get SFFI 'cid) "open\n") "open") 0)
                     (hsrtWriteCid (get SFFI 'cid) (strcat t_lib "\n"))
                     (error "FFI - try reloading"))))
         (t (error "FFI - Expected arguemnt type string, got %s." (typep t_lib))))
 )
 
-(defun ffiDefun (t_libHandle t_fnName t_rType l_aTypes)
+(defun ffiDefun (t_libHandle t_fnName t_rType @rest l_aTypes)
     (cond 
         ((not (stringp t_libHandle)) 
             (error "FFI - t_libHandle has to be a string instead of %s" (typep t_libHandle)))
@@ -20,16 +20,27 @@
             (error "FFI - t_aTypes has to be a string instead of %s" (typep l_aTypes)))
         (t 
             (let ((o_pid (get SFFI 'cid)) (n_timeout (get SFFI 'timeout)))
-                (if (eq (hsrtWriteCid o_pid "prep\n") "func") 
-                    (if (eq (hsrtWriteCid o_pid (strcat t_fnName "\n")) "lib") 
-                        (if (eq (hsrtWriteCid o_pid (strcat t_libHandle "\n")) "rtype") 
-                            (if (eq (hsrtWriteCid o_pid (strcat t_rType "\n")) "numargs") 
-                                (if (eq (hsrtWriteCid o_pid (sprintf nil "%n\n" (length l_aTypes)))
-                                        "atype")
-                                    (lastElem (transform 
-                                        (lambda (at)
-                                            (hsrtWriteCid o_pid (strcat at "\n")))
-                                        l_aTypes))
+                (if (eq (strcmp (hsrtWriteCid o_pid "prep\n") "func")  0)
+                    (if (eq (strcmp (hsrtWriteCid o_pid (strcat t_fnName "\n")) "lib")  0)
+                        (if (eq (strcmp (hsrtWriteCid o_pid (strcat t_libHandle "\n")) "rtype")  0)
+                            (if (eq (strcmp (hsrtWriteCid o_pid (strcat t_rType "\n")) 
+                                            "numargs")  0)
+                                (if (eq (strcmp (hsrtWriteCid o_pid 
+                                                    (sprintf nil "%n\n" (length l_aTypes)))
+                                                "atype") 0)
+                                    (let ((args (buildString (reverse (reduce 
+                                        (lambda (at c) 
+                                            (cons (sprintf nil "%s%n" at (length c)) c)) 
+                                        '() l_aTypes)) " ")))
+                                        (evalstring (sprintf nil
+                                            "(lambda (%s) (ffiCallFun \"%s\" \"%s\" %s))" 
+                                            args
+                                            (lastElem (transform 
+                                                (lambda (at)
+                                                    (hsrtWriteCid o_pid (strcat at "\n")))
+                                                l_aTypes))    
+                                            t_rType
+                                            args)))
                                     (error "FFI - atypes"))
                                 (error "FFI - numargs"))
                             (error "FFI - rtype"))
@@ -37,19 +48,23 @@
                     (error "FFI - function name")))))
 )
 
-(defun ffiCallfun (t_fnHandle l_fnArgs)
+(defun ffiCallFun (t_fnHandle t_rType @rest l_fnArgs)
     (cond 
         ((not (stringp t_fnHandle)) 
             (error "t_fnHandle has to be a string instead of %s" (typep t_fnHandle)))
         ((not (listp l_fnArgs)) 
             (error "l_fnArgs has to be a string instead of %s" (typep l_fnArgs)))
         (t (let ((o_pid (get SFFI 'cid)) (n_timeout (get SFFI 'timeout)))
-                (if (eq (hsrtWriteCid o_pid "call\n") "fun")
-                    (if (eq (hsrtWriteCid o_pid (strcat t_fnHandle "\n")) "val")
-                        (lastElem (transform 
-                            (lambda (val)
-                                (hsrtWriteCid o_pid (strcat val "\n")))
-                            l_fnArgs))
+                (if (eq (strcmp (hsrtWriteCid o_pid "call\n") "fun") 0)
+                    (if (eq (strcmp (hsrtWriteCid o_pid (strcat t_fnHandle "\n")) "val") 0)
+                        (let ((res (lastElem (transform 
+                                (lambda (val)
+                                    (hsrtWriteCid o_pid (sprintf nil "%n\n" val)))
+                                l_fnArgs))))
+                            (cond
+                                ((eq (strcmp t_rType "float") 0)
+                                    (evalstring res))
+                                (t res)))
                         (error "FFI - arguments %N" l_fnArgs))
                     (error "FFI - calling function %s" t_fnHandle)))))
 )
@@ -57,7 +72,9 @@
 (defun ffiCloseLib (t_libHandle)
     (cond
         ((ipcWaitForProcess (get SFFI 'cid))
-            (ipcKillProcess (get SFFI 'cid)))
+            (ipcKillProcess (get SFFI 'cid))
+            (ipcSkillProcess (get SFFI 'path))
+            (print (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))))
         (t (warn "FFI - Resource Busy...")))
 )
 
@@ -70,7 +87,7 @@
 
 
 (let ((ffiReady (ipcReadProcess (get SFFI 'cid) (get SFFI 'timeout))))
-    (if (eq ffiReady (get SFFI 'ready))
+    (if (eq (strcmp ffiReady (get SFFI 'ready)) 0)
         (printf "FFI - Up and running!\n")
-        (error "FFI - Could not launch FFI!"))
+        (error "FFI - Could not launch FFI, probably missing FFIPATH env var!"))
 )

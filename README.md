@@ -35,9 +35,11 @@ This should result in an executable named ```skillFFI```.
 
 ### Example Usage
 
-Start by loading ```ffi.ils```:
+Start by setting the ```FFIPATH``` environment variable and
+loading ```ffi.ils```:
 
 ```scheme
+(setShellEnvVar "FFIPATH" "/path/to/skillFFI")
 (load "ffi.ils")
 ```
 
@@ -47,7 +49,9 @@ This should print a confirmation
 FFI up and running
 ```
 
-To load a shared library either the complete and absolute path must be provided
+If it doesn't, it's probably due to a wrong path in ```FFIPATH```.
+
+To load a shared library either, the complete and absolute path must be provided
 or it has to be located in the LD\_LIBRARY\_PATH environment variable.
 
 Loading the C math library is accomplished like so:
@@ -62,14 +66,14 @@ Since there is no access to header files in SKILL the function prototype must be
 defined manually.
 
 ```scheme
-(define sqrtf (ffiDefun libm "sqrtf" "float" (list "float")))
+(define sqrtf (ffiDefun libm "sqrtf" "float" "float"))
 ```
 
 If successful ```ffiDefun``` returns a handle to the prototyped function, which
 can be called with ```ffiCallFun```.
 
 ```scheme
-(define res (ffiCallfun sqrtf (list 144.0)))
+(define res (ffiCallfun sqrtf 144.0))
 ```
 
 This stores the return value of a call to ```sqrtf``` in ```res```.
@@ -88,9 +92,9 @@ LD\_LIBRARY\_PATH environment variable.
 
 **ffiDefun**
 
-```(ffiDefun t_libHandle t_fnName t_rType l_aTypes) => t_fnHandle```
+```(ffiDefun t_libHandle t_fnName t_rType t_aType1 [ t_aType2 ... ]) => u_function```
 
-Defines the prototype for a C function and returns a handle to it if succesful.
+Defines the prototype for a C function and returns a function object to it if succesful.
 The _t\_libHandle_ is a handle returned by ```ffiOpenLib```. The name of the function
 has to be known in advance and passed as _t\_fnName_. The return type of the function
 is the string _t\_rType_. _t\_aTypes_ is a string list with the types of arguments.
@@ -98,17 +102,18 @@ is the string _t\_rType_. _t\_aTypes_ is a string list with the types of argumen
 + _t\_libHandle_ is a string containing a handle to an open shared library.
 + The name of the function is a string in _t\_fnName_.
 + _t\_rType_ is the return type of the function as a string.
-+ _l\_aTypes_ is a string list containing the types of the function arguments.
++ _t\_aTypes_ are strings containing the types of the function arguments.
 
-**ffiCallfun**
+**ffiCallFun**
 
-```(ffiCallfun t_fnHandle l_fnArgs) => x_result```
+```(ffiCallFun t_fnHandle x_fnArg1 [ x_fnArg2 ... ]) => x_result```
 
 Calls a previously defined function with the given arguemnts in _fnArgs_ and
-returns whatever this function call retured.
+returns whatever this function call retured. The returned function object of 
+```ffiDefun``` calls this function.
 
 + _t\_fnHandle_ is a string containing a function handle obtained by ```ffiDefun```.
-+ _l\_fnArgs_ is a list of arguments corresponding to the correct types given in the definition.
++ _x\_fnArgs_ are arguments corresponding to the correct types given in the definition.
 
 **ffiCloseLib**
 
